@@ -71,10 +71,14 @@
     paragraph('Completion code: ' + report.code + '    Knowledge check: ' + report.score + ' / 6');
     heading('Case Verdict');
     paragraph(report.verdict);
+    heading('Investigation Decisions');
+    report.decisions.forEach(item => paragraph(item));
     heading('Evidence-Based Explanation');
     paragraph(report.reason || 'No explanation submitted.');
-    heading('Advisory to Classmates');
-    paragraph(report.advisory || 'No advisory submitted.');
+    heading('Advisory: Message Received, Not Opened');
+    paragraph(report.received || 'No advisory submitted.');
+    heading('Advisory: File Downloaded or Run');
+    paragraph(report.downloaded || 'No advisory submitted.');
     heading('Personal Device Application');
     paragraph(report.homeComplete + ' of 4 personal-device situations completed.');
     heading('Knowledge Check and Feedback');
@@ -115,6 +119,7 @@
 
   function caseReport() {
     const extra = typeof window.getDigitalDecisionsExtras === 'function' ? window.getDigitalDecisionsExtras() : {};
+    const classwork = typeof window.getDigitalDecisionsEnhancements === 'function' ? window.getDigitalDecisionsEnhancements() : {};
     const verdicts = [
       'No account breach investigation needed',
       'Likely credential phishing and account misuse; investigate and contain',
@@ -125,8 +130,19 @@
       code: completion(),
       score: quizScore,
       verdict: verdicts[answers.verdict] || 'Not selected',
+      decisions: [
+        'Suspicious email response: ' + (['Clicked email link', 'Used trusted independent school contact', 'Replied with password'][answers.email] || 'Unanswered'),
+        'Timeline: ' + ((classwork.timeline || []).join(',') === '0,1,2,3' ? 'All four events ordered correctly' : 'Timeline not verified'),
+        'Account compromise conclusion: ' + (['Avery intentionally sent messages', 'Likely credential phishing and misuse', 'All recipients infected'][answers.timeline] || 'Unanswered'),
+        'Password choice: ' + (['Predictable repeated password', 'Predictable substitutions', 'Long unique passphrase'][answers.password] || 'Unanswered'),
+        'Authentication: ' + (['Password alone is enough', 'A second factor is required', 'No alert for correct password'][answers.mfa] || 'Unanswered'),
+        'Suspicious link response: ' + (['Ask classmate to verify link', 'Leave unopened and report', 'Forward to group chat'][answers.malware] || 'Unanswered'),
+        'Account recovery: ' + (['Secure account and end unfamiliar sessions', 'Change password only', 'Delete message and wait'][answers.recovery] || 'Unanswered'),
+        'Extra investigations completed: ' + ['mail','witness','auth','downloads','home'].map(group => group + ' ' + Object.keys((extra.state || {})[group] || {}).length).join('; ')
+      ],
       reason: verdictText,
-      advisory: extra.memo || '',
+      received: extra.received || '',
+      downloaded: extra.downloaded || '',
       homeComplete: extra.homeComplete || 0,
       review: qs.map((q, i) => ({
         question: q[0],
@@ -144,7 +160,8 @@
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = 'Digital_Decisions_Case01_Report.pdf';
+      const names = (team || 'Investigators').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').slice(0, 72);
+      anchor.download = 'DigitalDecisions_Case01_' + names + '.pdf';
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();

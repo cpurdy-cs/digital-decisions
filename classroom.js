@@ -1,6 +1,14 @@
 // Classroom release: durable progress, clear pair submission, and an interactive timeline.
 (function () {
   const KEY = 'digital-decisions-case01-v2';
+  // Keep the full game title, but use an investigation icon and neutral case codes.
+  const emblem = document.querySelector('.brand b');
+  if (emblem) {
+    emblem.setAttribute('aria-label', 'Investigation');
+    emblem.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg>';
+  }
+  const oldCompletion = completion;
+  completion = function () { return oldCompletion().replace(/^DD-01-/, 'CASE-01-'); };
   const route = [0,1,1.5,2,2.5,3,3.5,4,4.5,4.75,5,6,7];
   const draft = { first: '', second: '', verdict: '', received: '', downloaded: '' };
   let timeline = [];
